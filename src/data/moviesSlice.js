@@ -5,21 +5,48 @@ export const fetchMovies = createAsyncThunk('fetch-movies', async (apiUrl) => {
     return response.json()
 })
 
+export const fetchMoreMovies = createAsyncThunk('fetch-more-movies', async (apiUrl, { getState }) => {
+    const { movies } = getState();
+    const { page } = movies;
+    const url = `${apiUrl}&page=${page}`;
+
+    const response = await fetch(url)
+    return response.json()
+})
+
 const moviesSlice = createSlice({
     name: 'movies',
     initialState: { 
         movies: [],
         fetchStatus: '',
+        page: 2,
     },
     reducers: {},
     extraReducers: (builder) => {
         builder.addCase(fetchMovies.fulfilled, (state, action) => {
-            state.movies = action.payload
-            state.fetchStatus = 'success'
+            const results = action.payload.results ?? [];
+            
+            state.movies = results;
+            state.fetchStatus = 'success';
+
         }).addCase(fetchMovies.pending, (state) => {
-            state.fetchStatus = 'loading'
+            state.fetchStatus = 'loading';
         }).addCase(fetchMovies.rejected, (state) => {
-            state.fetchStatus = 'error'
+            state.fetchStatus = 'error';
+        }).addCase(fetchMoreMovies.fulfilled, (state, action) => {
+            const results = action.payload.results ?? [];
+            
+            state.movies = [
+                ...state.movies,
+                ...results
+            ];
+            state.page += state.page;
+            state.fetchStatus = 'success';
+
+        }).addCase(fetchMoreMovies.pending, (state) => {
+            state.fetchStatus = 'loading';
+        }).addCase(fetchMoreMovies.rejected, (state) => {
+            state.fetchStatus = 'error';
         })
     }
 })

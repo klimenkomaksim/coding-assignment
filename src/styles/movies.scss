@@ -2,6 +2,11 @@
     padding-top: 100px;
     color: #fff;
 
+    .grid-view {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
     @media (max-width: 720px) {
         padding-top: 70px;        
     }
